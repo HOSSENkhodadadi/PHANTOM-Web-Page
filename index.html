@@ -1,468 +1,1404 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>PHANTOM — A Large-Scale Dataset of Multimodal Adversarial Attacks for VLMs</title>
+
 <meta name="description" content="PHANTOM: an open dataset of ~50k multimodal jailbreaks for evaluating the safety of Vision-Language Models.">
+
 <link rel="icon" href="images/logo.svg">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
+
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+
 <style>
+
   :root{
+
     --paper:#FFFFFF;
+
     --paper-dim:#E2DECF;
+
     --ink:#1B1B1D;
+
     --redact:#0A0A0A;
+
     --alert:#C8102E;
+
     --muted:#6B6B66;
+
     --line:#D6D2C4;
+
     --max-w:1080px;
+
   }
 
+
+
   *{box-sizing:border-box;}
+
   html{scroll-behavior:smooth;}
+
   body{
+
     margin:0;
+
     background:var(--paper);
+
     color:var(--ink);
+
     font-family:'Source Serif 4', Georgia, serif;
+
     font-size:18px;
+
     line-height:1.65;
+
     -webkit-font-smoothing:antialiased;
+
   }
+
   .mono{font-family:'JetBrains Mono', 'Courier New', monospace;}
+
   a{color:var(--ink);}
+
+
 
   .wrap{max-width:var(--max-w); margin:0 auto; padding:0 28px;}
 
+
+
   /* paper texture seams */
+
   body::before{
+
     content:"";
+
     position:fixed; inset:0;
+
     background-image:
+
       repeating-linear-gradient(0deg, rgba(0,0,0,0.018) 0px, rgba(0,0,0,0.018) 1px, transparent 1px, transparent 3px);
+
     pointer-events:none;
+
     z-index:0;
+
   }
+
+
 
   /* ---------- header / case file strip ---------- */
+
   .case-strip{
+
     border-bottom:1.5px solid var(--ink);
+
     padding:10px 0;
+
     font-family:'JetBrains Mono', monospace;
+
     font-size:11.5px;
+
     letter-spacing:1.5px;
+
     color:var(--muted);
+
     text-transform:uppercase;
+
   }
+
   .case-strip .wrap{display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;}
+
   .case-strip .tag-red{color:var(--alert); font-weight:700;}
 
+
+
   header.masthead{
+
     padding:46px 0 28px;
+
     border-bottom:3px double var(--ink);
+
   }
+
   .title-row{display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
+
   .title-row img.logo{width:46px; height:46px; flex-shrink:0;}
+
   h1.paper-title{
+
     font-family:'JetBrains Mono', monospace;
+
     font-weight:800;
+
     font-size:clamp(28px, 5vw, 46px);
+
     letter-spacing:-0.5px;
+
     margin:0;
+
     line-height:1.05;
+
   }
+
   h1.paper-title .accent{color:var(--alert);}
+
   .subtitle{
+
     margin:14px 0 0;
+
     font-size:19px;
+
     color:var(--ink);
+
     max-width:760px;
+
   }
+
+
 
   .authors{
+
     margin-top:28px;
+
     font-size:16.5px;
+
   }
+
   .authors .names{margin:0;}
+
   .authors .names span{margin-right:2px;}
+
   .authors a{
+
     text-decoration:none;
+
     border-bottom:1.5px solid var(--alert);
+
   }
+
   .authors a:hover{background:rgba(200,16,46,0.08);}
+
   .star-note{
+
     font-family:'JetBrains Mono', monospace;
+
     font-size:12.5px;
+
     color:var(--muted);
+
     margin:8px 0 0;
+
   }
+
   .affils{
+
     font-family:'JetBrains Mono', monospace;
+
     font-size:13px;
+
     color:var(--muted);
+
     margin:10px 0 0;
+
     line-height:1.7;
+
   }
+
   .affils sup{margin-right:4px;}
 
+
+
   /* ---------- stamp buttons ---------- */
+
   .stamp-row{
+
     display:flex; gap:18px; flex-wrap:wrap;
+
     margin:32px 0 6px;
+
   }
+
   .stamp{
+
     position:relative;
+
     display:inline-flex;
+
     align-items:center;
+
     gap:8px;
+
     font-family:'JetBrains Mono', monospace;
+
     font-weight:700;
+
     font-size:13.5px;
+
     letter-spacing:1.5px;
+
     text-transform:uppercase;
+
     text-decoration:none;
+
     color:var(--ink);
+
     border:2.5px solid var(--ink);
+
     padding:11px 20px;
+
     border-radius:2px;
+
     background:transparent;
+
     transform:rotate(-1.1deg);
+
     transition:transform .15s ease, background .15s ease, color .15s ease;
+
   }
+
   .stamp:nth-child(2){transform:rotate(0.8deg);}
+
   .stamp:nth-child(3){transform:rotate(-0.6deg);}
+
   .stamp::before{content:"";}
+
   .stamp:hover{
+
     transform:rotate(0deg) translateY(-2px);
+
     background:var(--ink);
+
     color:var(--paper);
+
   }
+
   .stamp.red{
+
     border-color:var(--alert);
+
     color:var(--alert);
+
   }
+
   .stamp.red:hover{background:var(--alert); color:var(--paper);}
 
+
+
   /* ---------- sections ---------- */
+
   section{padding:64px 0;}
+
   section + section{border-top:1px solid var(--line);}
 
+
+
   .eyebrow{
+
     font-family:'JetBrains Mono', monospace;
+
     font-size:12.5px;
+
     letter-spacing:3px;
+
     text-transform:uppercase;
+
     color:var(--alert);
+
     font-weight:700;
+
     margin:0 0 10px;
+
   }
+
   h2.section-title{
+
     font-family:'JetBrains Mono', monospace;
+
     font-size:clamp(22px,3.2vw,32px);
+
     font-weight:800;
+
     margin:0 0 22px;
+
     letter-spacing:-0.3px;
+
   }
+
+
 
   /* ---------- hero / teaser ---------- */
+
   .teaser-figure{
-    margin:0px 0 18px; /* Reduced top margin from 30px to 0px */
+
+    margin:30px 0 18px;
+
     position:relative;
+
   }
+
   .teaser-figure img{
+
     width:80%;
+
     display:block;
-    margin: 0 auto;
+
+    margin: 0 auto; /* Centered horizontally */
+
   }
+
   .abstract-line{
+
     font-size:19px;
+
     max-width:820px;
+
     margin:0 auto;
+
   }
+
   .abstract-line b{
+
     background:linear-gradient(transparent 60%, rgba(200,16,46,0.18) 60%);
+
     font-weight:700;
+
   }
+
+
 
   /* ---------- evidence tags / stat row ---------- */
+
   .tag-grid{
+
     display:grid;
+
     grid-template-columns:repeat(auto-fit, minmax(150px,1fr));
+
     gap:14px;
+
     margin:36px 0 0;
+
   }
+
   .evidence-tag{
+
     border:1.5px solid var(--ink);
+
     padding:14px 16px;
+
     position:relative;
+
   }
+
   .evidence-tag::before{
+
     content:"";
+
     position:absolute; top:-1.5px; left:14px;
+
     width:14px; height:14px;
+
     background:var(--paper);
+
     border:1.5px solid var(--ink);
+
     border-radius:50%;
+
   }
+
   .evidence-tag .num{
+
     font-family:'JetBrains Mono', monospace;
+
     font-weight:800;
+
     font-size:26px;
+
     display:block;
+
     color:var(--alert);
+
   }
+
   .evidence-tag .lbl{
+
     font-family:'JetBrains Mono', monospace;
+
     font-size:11.5px;
+
     letter-spacing:1px;
+
     text-transform:uppercase;
+
     color:var(--muted);
+
   }
+
+
 
   /* ---------- figure placeholders ---------- */
+
   figure.exhibit{margin:34px 0;}
-  figure.exhibit img{width:80%; display:block; margin: 0 auto;}
+
+  figure.exhibit img{width:80%; display:block; margin: 0 auto;} /* Centered horizontally, no border */
+
   figcaption{
+
     font-family:'JetBrains Mono', monospace;
+
     font-size:12.5px;
+
     color:var(--muted);
+
     margin-top:4px;
+
     letter-spacing:0.4px;
-    text-align: center;
+
+    text-align: center; /* Centered caption for better alignment */
+
   }
+
+
 
   .two-col{
+
     display:grid;
+
     grid-template-columns:1fr 1fr;
+
     gap:18px;
+
     align-items:start;
+
   }
+
   @media (max-width:760px){.two-col{grid-template-columns:1fr;}}
 
+
+
   /* ---------- tables ---------- */
+
   .table-scroll{overflow-x:auto; margin:20px 0; border:1.5px solid var(--ink);}
+
   table{
+
     width:100%;
+
     border-collapse:collapse;
+
     font-family:'JetBrains Mono', monospace;
+
     font-size:13px;
+
     min-width:560px;
+
   }
+
   table.wide{min-width:980px;}
+
   th, td{
+
     padding:9px 12px;
+
     text-align:right;
+
     border-bottom:1px solid var(--line);
+
     white-space:nowrap;
+
   }
+
   th:first-child, td:first-child{text-align:left; white-space:normal;}
+
   thead th{
+
     background:var(--ink);
+
     color:var(--paper);
+
     font-weight:700;
+
     text-transform:uppercase;
+
     letter-spacing:0.5px;
+
     font-size:11.5px;
+
   }
+
   tbody tr:nth-child(even){background:rgba(0,0,0,0.025);}
+
   tbody tr:hover{background:rgba(200,16,46,0.06);}
+
   td.max-cell{color:var(--alert); font-weight:700;}
+
   td.avg-cell{font-weight:700; border-left:1.5px solid var(--ink);}
+
   th:last-child, td:last-child{border-left:1.5px solid var(--ink);}
 
+
+
   /* ---------- leaderboard tabs ---------- */
+
   #leaderboard{scroll-margin-top:64px;}
+
   .tab-row{
+
     display:flex; gap:8px; flex-wrap:wrap;
+
     margin:24px 0 4px;
+
   }
+
   .tab-btn{
+
     font-family:'JetBrains Mono', monospace;
+
     font-size:12.5px;
+
     font-weight:700;
+
     letter-spacing:1px;
+
     text-transform:uppercase;
+
     padding:9px 16px;
+
     border:1.5px solid var(--ink);
+
     background:transparent;
+
     color:var(--ink);
+
     cursor:pointer;
+
     border-radius:2px;
+
   }
+
   .tab-btn.active{background:var(--alert); border-color:var(--alert); color:var(--paper);}
+
   .tab-panel{display:none;}
+
   .tab-panel.active{display:block;}
 
+
+
   .note{
+
     font-size:14.5px;
+
     color:var(--muted);
+
     font-family:'JetBrains Mono', monospace;
+
     margin-top:10px;
+
   }
+
+
 
   /* ---------- citation ---------- */
+
   .citebox{
+
     background:var(--redact);
+
     color:#D9D6CC;
+
     padding:30px 28px;
+
     border-radius:2px;
+
     position:relative;
+
     overflow:hidden;
+
   }
+
   .citebox::after{
+
     content:"CONFIDENTIAL";
+
     position:absolute;
+
     right:-40px; top:18px;
+
     font-family:'JetBrains Mono', monospace;
+
     font-size:64px;
+
     font-weight:800;
+
     color:rgba(255,255,255,0.035);
+
     transform:rotate(-12deg);
+
     pointer-events:none;
+
     white-space:nowrap;
+
   }
+
   .citebox pre{
+
     margin:0;
+
     font-family:'JetBrains Mono', monospace;
+
     font-size:13px;
+
     line-height:1.7;
+
     white-space:pre-wrap;
+
     word-break:break-word;
+
   }
+
   .citebox-head{
+
     display:flex; justify-content:space-between; align-items:center;
+
     margin-bottom:14px;
+
     flex-wrap:wrap; gap:10px;
+
   }
+
   .copy-btn{
+
     font-family:'JetBrains Mono', monospace;
+
     font-size:12px;
+
     letter-spacing:1px;
+
     text-transform:uppercase;
+
     background:transparent;
+
     border:1.5px solid #D9D6CC;
+
     color:#D9D6CC;
+
     padding:8px 14px;
+
     cursor:pointer;
+
     border-radius:2px;
+
   }
+
   .copy-btn:hover{background:#D9D6CC; color:var(--redact);}
 
+
+
   footer{
+
     padding:36px 0 50px;
+
     font-family:'JetBrains Mono', monospace;
+
     font-size:12px;
+
     color:var(--muted);
+
     text-align:center;
+
   }
+
+
 
   @media (prefers-reduced-motion: reduce){
+
     *{transition:none !important; scroll-behavior:auto !important;}
+
   }
+
+
 
   @media (max-width:600px){
+
     body{font-size:16px;}
+
     .stamp{font-size:12px; padding:9px 14px;}
+
     section{padding:46px 0;}
+
   }
+
 </style>
+
 </head>
+
 <body>
+
 <script>
+
+  // Try the sibling extension (.png <-> .svg) if the first image fails to load.
+
+  // Lets the same markup work whether a figure is dropped in as .png or .svg.
+
   function imgFallback(img){
+
     if (img.dataset.fallbackTried) { img.onerror = null; return; }
+
     img.dataset.fallbackTried = "1";
+
     if (/\.png$/i.test(img.src)) {
+
       img.src = img.src.replace(/\.png$/i, ".svg");
+
     } else if (/\.svg$/i.test(img.src)) {
+
       img.src = img.src.replace(/\.svg$/i, ".png");
+
     }
+
   }
+
 </script>
 
+
+
 <div class="case-strip">
+
   <div class="wrap">
+
     <span>CASE FILE <span class="tag-red">PHANTOM-2026</span> // VLM SAFETY EVALUATION</span>
+
     <span>STATUS: <span class="tag-red">OPEN DATASET</span></span>
+
   </div>
+
 </div>
 
+
+
 <header class="masthead">
+
   <div class="wrap">
+
     <div class="title-row">
+
       <img src="images/logo.svg" alt="PHANTOM logo" class="logo">
+
       <h1 class="paper-title">PHANT<span class="accent">O</span>M</h1>
+
     </div>
+
     <p class="subtitle">A Large-Scale Dataset of Multimodal Adversarial Attacks for Vision-Language Models</p>
 
+
+
     <div class="authors">
+
       <p class="names">
+
         <span>Simone Gallivanone<sup>1,*</sup></span>,
+
         <span><a href="https://it.linkedin.com/in/hosseinekhodadadi" target="_blank" rel="noopener">Hossein Khodadadi</a><sup>1,*</sup></span>,
+
         <span>Mauro Dore<sup>2</sup></span>,
+
         <span>Mauro Medda<sup>2</sup></span>,
+
         <span>Nicola Franco<sup>1</sup></span>
+
       </p>
+
       <p class="star-note">* Equal contribution</p>
+
       <p class="affils">
+
         <sup>1</sup> The Italian Institute of Artificial Intelligence (AI4I), Turin, Italy<br>
+
         <sup>2</sup> HikmaAI S.r.l., Pula, Italy
+
       </p>
+
     </div>
+
+
 
     <div class="stamp-row">
+
       <a class="stamp" href="https://huggingface.co/datasets/it4lia/PHANTOM" target="_blank" rel="noopener">🤗 Hugging Face</a>
+
       <a class="stamp" href="https://arxiv.org/abs/2606.24388" target="_blank" rel="noopener">arXiv</a>
+
       <a class="stamp red" href="#leaderboard">Leaderboard</a>
+
     </div>
+
   </div>
+
 </header>
 
+
+
+<!-- ===================== TEASER ===================== -->
+
 <section id="overview">
+
   <div class="wrap">
+
     <figure class="teaser-figure">
+
       <img src="images/teaser.png" alt="PHANTOM teaser figure" onerror="imgFallback(this)">
-      <figcaption>Fig. 1 — Overview of the PHANTOM pipeline: harmful intents, attack strategies, target models, and evaluation.</figcaption>
+
+      <figcaption>Fig. 1 — Overview of the PHANTOM pipeline: harmful intents, attack strategies, target models, and evaluation. <span class="mono">(drop in images/teaser.png or images/teaser.svg)</span></figcaption>
+
     </figure>
 
+
+
     <p class="abstract-line">
+
       <b>PHANTOM</b> is an open dataset of <b>~50k multimodal jailbreaks</b> for evaluating the safety of Vision-Language Models.
+
+      It offers 47,524 adversarial image-text pairs spanning 7,826 harmful intents across 10 categories and 55 subcategories,
+
+      built with five attack strategies in single- and multi-turn settings.
+
+      Attacks are generated against six open-source VLMs and transferred to six proprietary frontier models.
+
     </p>
 
+
+
     <div class="tag-grid">
+
       <div class="evidence-tag"><span class="num">47,524</span><span class="lbl">Adversarial pairs</span></div>
+
       <div class="evidence-tag"><span class="num">7,826</span><span class="lbl">Harmful intents</span></div>
+
       <div class="evidence-tag"><span class="num">10 / 55</span><span class="lbl">Categories / subcategories</span></div>
+
       <div class="evidence-tag"><span class="num">5</span><span class="lbl">Attack strategies</span></div>
+
       <div class="evidence-tag"><span class="num">6 + 6</span><span class="lbl">Open / proprietary VLMs</span></div>
+
     </div>
+
   </div>
+
 </section>
 
-<!-- ... (remaining sections: leaderboard, dataset, analysis) ... -->
+
+
+<!-- ===================== BENCHMARK / LEADERBOARD ===================== -->
+
+<section id="leaderboard">
+
+  <div class="wrap">
+
+    <p class="eyebrow">01 — Benchmark</p>
+
+    <h2 class="section-title">PHANTOM Dataset</h2>
+
+    <p>
+
+      We evaluate six open-source VLMs (DeepSeek-VL2, GLM-4.6V-Flash, Kimi-VL-A3B-Instruct, Qwen3-VL-30B-A3B-Instruct,
+
+      Qwen3.5-27B, Qwen3.6-27B) and transfer the resulting attacks to six proprietary frontier models
+
+      (GPT-5.4, GPT-5.5, Claude Opus 4.6/4.7/4.8, Gemini 3.1 Pro), reporting the Attack Success Rate (ASR, %)
+
+      per model, per harmful-intent category, and per attack strategy. Higher ASR indicates a more vulnerable model.
+
+    </p>
+
+
+
+    <figure class="exhibit">
+
+      <img src="images/radar.png" alt="Benchmark overview plot" onerror="imgFallback(this)">
+
+      <figcaption>Fig. 2 — Average ASR across attack strategies, by model. <span class="mono">(drop in images/benchmark.png or images/benchmark.svg)</span></figcaption>
+
+    </figure>
+
+
+
+    <p>
+
+      Single-turn strategies such as <span class="mono">MML</span> and multi-turn strategies such as
+
+      <span class="mono">CSDJ</span> consistently surface the highest ASR across both open and proprietary
+
+      models, while categories with stronger built-in refusal coverage — notably Cybersecurity Threats (E) —
+
+      remain among the most exploitable in absolute terms once an attack lands. Use the tabs below to inspect
+
+      ASR (%) per model and per category, for each of the five attack strategies in PHANTOM.
+
+    </p>
+
+
+
+    <div class="tab-row" id="tabRow"></div>
+
+
+
+    <div id="tabPanels"></div>
+
+    <p class="note">Bold red values mark the row-wise (per model) maximum across categories, including Average. Source: PHANTOM benchmark corpus, ASR (%).</p>
+
+
+
+    <figure class="exhibit">
+
+      <img src="images/attack-stats.png" alt="Attack statistics plot" onerror="imgFallback(this)">
+
+      <figcaption>Fig. 3 — Statistics of generated attacks by strategy and turn count. <span class="mono">(drop in images/attack-stats.png or images/attack-stats.svg)</span></figcaption>
+
+    </figure>
+
+  </div>
+
+</section>
+
+
+
+<!-- ===================== DATASET ===================== -->
+
+<section id="dataset">
+
+  <div class="wrap">
+
+    <p class="eyebrow">02 — Dataset</p>
+
+    <h2 class="section-title">PHANTOM Benchmark</h2>
+
+
+
+    <div class="two-col">
+
+      <p>
+
+        Harmful intents are curated and stratified into ten top-level categories — including a dedicated
+
+        <b>Child Safety</b> category — and further split into 55 fine-grained subcategories, giving broad
+
+        coverage of the risk surface relevant to multimodal jailbreaks. Each intent is paired with one or more
+
+        attacks built using <span class="mono">BAP</span>, <span class="mono">IDEATOR</span>,
+
+        <span class="mono">MML</span>, <span class="mono">FC_ATTACK</span> and <span class="mono">CSDJ</span>.
+
+      </p>
+
+
+
+      <div>
+
+        <p class="note" style="margin-bottom:6px;">TABLE — Number of intents per category</p>
+
+        <div class="table-scroll">
+
+          <table>
+
+            <thead><tr><th>Category</th><th>#&nbsp;Intents</th></tr></thead>
+
+            <tbody>
+
+              <tr><td>A. Ethical and Social Risks</td><td>988</td></tr>
+
+              <tr><td>B. Privacy and Data Risks</td><td>504</td></tr>
+
+              <tr><td>C. Safety and Physical Harm</td><td>877</td></tr>
+
+              <tr><td>D. Criminal and Economic Risks</td><td>1,017</td></tr>
+
+              <tr><td>E. Cybersecurity Threats</td><td>725</td></tr>
+
+              <tr><td>F. Information and Political Manipulation</td><td>534</td></tr>
+
+              <tr><td>G. Content and Cultural Safety</td><td>537</td></tr>
+
+              <tr><td>H. Intellectual Property and Ownership</td><td>304</td></tr>
+
+              <tr><td>I. Decision and Cognitive Risks</td><td>1,593</td></tr>
+
+              <tr><td><b>J. Child Safety (new)</b></td><td><b>747</b></td></tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+        <p class="note">See the <a href="#leaderboard">leaderboard</a> for per-category attack success rates.</p>
+
+      </div>
+
+    </div>
+
+
+
+    <figure class="exhibit">
+
+      <img src="images/benchmark.png" alt="Category coverage radar plot" onerror="imgFallback(this)">
+
+      <figcaption>Fig. 4 — Distribution of harmful intents across risk categories. <span class="mono">(drop in images/radar.png or images/radar.svg)</span></figcaption>
+
+    </figure>
+
+  </div>
+
+</section>
+
+
+
+<!-- ===================== ATTACK ANALYSIS ===================== -->
+
+<section id="analysis">
+
+  <div class="wrap">
+
+    <p class="eyebrow">03 — Analysis</p>
+
+    <h2 class="section-title">PHANTOM Attack Analysis</h2>
+
+    <p>
+
+      We further analyze failure modes across attack strategies, intent categories, and model families, examining
+
+      where transfer from open-source surrogate models to proprietary targets succeeds or fails, and which
+
+      visual-textual perturbation patterns most reliably bypass current safety alignment.
+
+    </p>
+
+    <figure class="exhibit">
+
+      <img src="images/attack-analysis.png" alt="Attack analysis figure" onerror="imgFallback(this)">
+
+      <figcaption>Fig. 5 — Cross-model and cross-category attack transfer analysis. <span class="mono">(drop in images/attack-analysis.png or images/attack-analysis.svg)</span></figcaption>
+
+    </figure>
+
+  </div>
+
+</section>
+
+
+
+<!-- ===================== CITATION ===================== -->
 
 <section id="citation">
+
   <div class="wrap">
+
     <p class="eyebrow">04 — Citation</p>
+
     <h2 class="section-title">BibTeX</h2>
+
     <div class="citebox">
+
       <div class="citebox-head">
+
         <span class="mono" style="letter-spacing:1px; font-size:12.5px;">CITE THIS WORK</span>
+
         <button class="copy-btn" id="copyBtn">Copy</button>
+
       </div>
-      <pre id="bibtex">@misc{gallivanone2026phantomlargescaledatasetmultimodal,
-      title={PHANTOM: A Large-Scale Dataset of Multimodal Adversarial Attacks for Vision-Language Models}, 
-      author={Simone Gallivanone and Hossein Khodadadi and Mauro Dore and Mauro Medda and Nicola Franco},
-      year={2026},
-      eprint={2606.24388},
-      archivePrefix={arXiv},
-      primaryClass={cs.AI},
-      url={https://arxiv.org/abs/2606.24388}, 
+
+      <pre id="bibtex">@article{gallivanone2026phantom,
+
+  title   = {PHANTOM: A Large-Scale Dataset of Multimodal Adversarial Attacks for Vision-Language Models},
+
+  author  = {Gallivanone, Simone and Khodadadi, Hossein and Dore, Mauro and Medda, Mauro and Franco, Nicola},
+
+  journal = {arXiv preprint arXiv:0000.00000},
+
+  year    = {2026}
+
 }</pre>
+
     </div>
+
   </div>
+
 </section>
+
+
+
+<footer>
+
+  <div class="wrap">
+
+    AI4I — The Italian Institute of Artificial Intelligence, Turin, Italy &nbsp;·&nbsp; HikmaAI S.r.l., Pula, Italy<br>
+
+    PHANTOM dataset &amp; benchmark, 2026.
+
+  </div>
+
+</footer>
+
+
+
+<script>
+
+// ---------------- Leaderboard data ----------------
+
+const CATS = ["A","B","C","D","E","F","G","H","I","J"];
+
+const ATTACKS = {
+
+  "BAP": [
+
+    ["Gemma-4-26B",23.75,16.00,10.00,18.00,27.14,20.00,22.50,22.50,26.88,34.00,22.00],
+
+    ["Qwen3.6-27B",42.50,40.00,30.71,42.00,38.57,35.83,33.75,40.00,45.00,51.00,39.82],
+
+    ["GPT-5.4",13.75,15.00,25.00,23.00,11.43,18.33,10.00,6.25,10.62,23.00,15.91],
+
+    ["GPT-5.5",47.50,41.00,59.29,68.00,47.86,42.50,46.25,35.00,48.12,50.00,49.09],
+
+    ["Claude Opus 4.6",6.25,11.00,0.71,10.00,8.57,5.83,8.75,7.50,6.88,17.00,7.91],
+
+    ["Claude Opus 4.7",51.25,44.00,20.71,61.00,40.00,39.17,35.00,56.25,50.00,49.00,43.64],
+
+    ["Claude Opus 4.8",47.50,40.00,12.14,65.00,39.29,34.17,21.25,41.25,43.12,51.00,38.73],
+
+    ["Gemini 3.1 Pro",23.75,39.00,35.71,45.00,74.29,28.33,30.00,27.50,25.62,44.00,38.36]
+
+  ],
+
+  "IDEATOR": [
+
+    ["Gemma-4-26B",10.00,30.00,20.71,34.00,33.57,20.00,15.00,21.25,35.62,43.00,27.36],
+
+    ["Qwen3.6-27B",7.50,7.00,11.43,14.00,15.00,16.67,18.75,7.50,23.12,65.00,18.82],
+
+    ["GPT-5.4",25.00,14.00,27.14,49.00,44.29,36.67,26.25,12.50,27.50,33.00,30.45],
+
+    ["GPT-5.5",21.25,28.00,26.43,42.00,48.57,44.17,52.50,31.25,37.50,44.00,37.82],
+
+    ["Claude Opus 4.6",6.25,6.00,5.71,17.00,13.57,5.83,3.75,5.00,13.12,7.00,8.82],
+
+    ["Claude Opus 4.7",25.00,39.00,12.14,53.00,30.71,30.00,32.50,45.00,34.38,33.00,32.55],
+
+    ["Claude Opus 4.8",16.25,24.00,12.14,47.00,32.86,24.17,17.50,33.75,31.25,20.00,26.09],
+
+    ["Gemini 3.1 Pro",28.75,43.00,42.14,56.00,71.43,58.33,56.25,42.50,54.37,62.00,52.64]
+
+  ],
+
+  "MML": [
+
+    ["Gemma-4-26B",95.56,100.00,90.34,98.51,99.37,96.88,94.87,100.00,96.55,95.26,96.09],
+
+    ["Qwen3.6-27B",80.00,85.71,80.97,89.63,94.55,87.50,71.79,86.21,83.14,88.42,86.10],
+
+    ["GPT-5.4",71.76,73.45,74.13,67.92,70.00,72.79,78.75,80.46,80.00,95.00,76.03],
+
+    ["GPT-5.5",91.25,84.00,90.71,92.00,90.71,89.17,82.50,80.00,81.25,61.00,84.64],
+
+    ["Claude Opus 4.6",71.95,61.32,32.14,60.78,63.95,63.78,41.25,48.81,62.86,54.55,56.19],
+
+    ["Claude Opus 4.7",1.25,10.00,0.71,6.00,2.86,0.83,0.00,5.00,1.88,1.00,2.82],
+
+    ["Claude Opus 4.8",12.50,21.00,3.57,26.00,10.00,11.67,11.25,21.25,13.75,23.00,14.64],
+
+    ["Gemini 3.1 Pro",3.53,0.88,4.20,0.94,40.62,81.62,66.25,93.10,93.71,29.00,43.38]
+
+  ],
+
+  "FC_ATTACK": [
+
+    ["Gemma-4-26B",37.50,29.00,2.14,7.00,22.14,11.67,33.75,28.75,18.75,14.00,18.91],
+
+    ["Qwen3.6-27B",86.25,81.00,55.71,85.00,92.86,82.50,72.50,76.25,78.12,64.00,77.27],
+
+    ["GPT-5.4",52.50,43.00,60.71,71.00,77.14,74.17,46.25,47.50,59.38,63.00,61.00],
+
+    ["GPT-5.5",57.50,57.00,68.57,86.00,89.29,76.67,67.50,63.75,65.00,74.00,71.36],
+
+    ["Claude Opus 4.6",77.50,85.00,41.43,68.00,87.86,70.83,63.75,82.50,75.62,60.00,70.82],
+
+    ["Claude Opus 4.7",70.00,72.00,38.57,75.00,68.57,65.00,37.50,82.50,68.75,61.00,63.45],
+
+    ["Claude Opus 4.8",63.75,83.00,48.57,77.00,79.29,75.00,36.25,78.75,62.50,70.00,67.45],
+
+    ["Gemini 3.1 Pro",35.00,46.00,15.00,28.00,67.14,26.67,35.00,55.00,40.62,21.00,37.00]
+
+  ],
+
+  "CSDJ": [
+
+    ["Gemma-4-26B",53.75,75.00,27.86,53.00,85.71,57.50,27.50,41.25,36.88,55.00,51.35],
+
+    ["Qwen3.6-27B",71.25,68.00,64.29,74.00,84.29,70.00,70.00,60.00,61.88,70.00,69.37],
+
+    ["GPT-5.4",78.75,78.00,91.43,87.00,87.14,86.67,66.25,61.25,63.75,81.00,78.82],
+
+    ["GPT-5.5",82.50,80.00,88.57,91.00,95.00,85.00,81.25,70.00,69.38,87.00,83.16],
+
+    ["Claude Opus 4.6",73.75,88.00,67.86,85.00,93.57,84.17,48.75,71.25,73.75,83.00,77.82],
+
+    ["Claude Opus 4.7",70.00,90.00,57.14,78.00,95.00,88.33,50.00,71.25,59.38,88.00,74.82],
+
+    ["Claude Opus 4.8",80.00,89.00,71.43,91.00,95.00,87.50,50.00,71.25,59.38,89.00,78.45],
+
+    ["Gemini 3.1 Pro",65.00,86.00,39.29,72.00,86.43,67.50,46.25,68.75,63.12,68.00,66.18]
+
+  ]
+
+};
+
+
+
+function fmt(v){ return v.toFixed(2); }
+
+
+
+function buildTable(rows){
+
+  let head = "<thead><tr><th>Model</th>" + CATS.map(c=>`<th>${c}</th>`).join("") + "<th>Average</th></tr></thead>";
+
+  let body = "<tbody>";
+
+  rows.forEach(r=>{
+
+    const name = r[0];
+
+    const vals = r.slice(1,11);
+
+    const avg = r[11];
+
+    const maxVal = Math.max(...vals, avg);
+
+    let cells = vals.map(v => `<td class="${v===maxVal ? 'max-cell':''}">${fmt(v)}</td>`).join("");
+
+    body += `<tr><td>${name}</td>${cells}<td class="avg-cell ${avg===maxVal?'max-cell':''}">${fmt(avg)}</td></tr>`;
+
+  });
+
+  body += "</tbody>";
+
+  return `<div class="table-scroll"><table class="wide">${head}${body}</table></div>`;
+
+}
+
+
+
+const tabRow = document.getElementById('tabRow');
+
+const tabPanels = document.getElementById('tabPanels');
+
+const names = Object.keys(ATTACKS);
+
+
+
+names.forEach((name, i)=>{
+
+  const btn = document.createElement('button');
+
+  btn.className = 'tab-btn' + (i===0 ? ' active' : '');
+
+  btn.textContent = name.replace('_',' ');
+
+  btn.dataset.target = name;
+
+  btn.addEventListener('click', ()=>{
+
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+
+    btn.classList.add('active');
+
+    document.getElementById('panel-'+name).classList.add('active');
+
+  });
+
+  tabRow.appendChild(btn);
+
+
+
+  const panel = document.createElement('div');
+
+  panel.className = 'tab-panel' + (i===0 ? ' active' : '');
+
+  panel.id = 'panel-' + name;
+
+  panel.innerHTML = buildTable(ATTACKS[name]);
+
+  tabPanels.appendChild(panel);
+
+});
+
+
+
+// ---------------- copy bibtex ----------------
+
+document.getElementById('copyBtn').addEventListener('click', ()=>{
+
+  const text = document.getElementById('bibtex').innerText;
+
+  navigator.clipboard.writeText(text).then(()=>{
+
+    const btn = document.getElementById('copyBtn');
+
+    const old = btn.textContent;
+
+    btn.textContent = 'Copied';
+
+    setTimeout(()=>{ btn.textContent = old; }, 1500);
+
+  });
+
+});
+
+</script>
+
 </body>
+
 </html>
+
+reproduce the code and add this as citation: @misc{gallivanone2026phantomlargescaledatasetmultimodal,
+
+
+
+      title={PHANTOM: A Large-Scale Dataset of Multimodal Adversarial Attacks for Vision-Language Models}, 
+
+
+
+      author={Simone Gallivanone and Hossein Khodadadi and Mauro Dore and Mauro Medda and Nicola Franco},
+
+
+
+      year={2026},
+
+
+
+      eprint={2606.24388},
+
+
+
+      archivePrefix={arXiv},
+
+
+
+      primaryClass={cs.AI},
+
+
+
+      url={https://arxiv.org/abs/2606.24388}, 
+
+
+
+} 
+
