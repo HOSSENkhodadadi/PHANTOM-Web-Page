@@ -369,6 +369,19 @@
 </style>
 </head>
 <body>
+<script>
+  // Try the sibling extension (.png <-> .svg) if the first image fails to load.
+  // Lets the same markup work whether a figure is dropped in as .png or .svg.
+  function imgFallback(img){
+    if (img.dataset.fallbackTried) { img.onerror = null; return; }
+    img.dataset.fallbackTried = "1";
+    if (/\.png$/i.test(img.src)) {
+      img.src = img.src.replace(/\.png$/i, ".svg");
+    } else if (/\.svg$/i.test(img.src)) {
+      img.src = img.src.replace(/\.svg$/i, ".png");
+    }
+  }
+</script>
 
 <div class="case-strip">
   <div class="wrap">
@@ -412,8 +425,8 @@
 <section id="overview">
   <div class="wrap">
     <figure class="teaser-figure">
-      <img src="images/teaser-placeholder.svg" alt="PHANTOM teaser figure">
-      <figcaption>Fig. 1 — Overview of the PHANTOM pipeline: harmful intents, attack strategies, target models, and evaluation. <span class="mono">(replace images/teaser-placeholder.svg with images/teaser.png)</span></figcaption>
+      <img src="images/teaser.png" alt="PHANTOM teaser figure" onerror="imgFallback(this)">
+      <figcaption>Fig. 1 — Overview of the PHANTOM pipeline: harmful intents, attack strategies, target models, and evaluation. <span class="mono">(drop in images/teaser.png or images/teaser.svg)</span></figcaption>
     </figure>
 
     <p class="abstract-line">
@@ -433,24 +446,57 @@
   </div>
 </section>
 
+<!-- ===================== BENCHMARK / LEADERBOARD ===================== -->
+<section id="leaderboard">
+  <div class="wrap">
+    <p class="eyebrow">01 — Benchmark</p>
+    <h2 class="section-title">PHANTOM Benchmark</h2>
+    <p>
+      We evaluate six open-source VLMs (DeepSeek-VL2, GLM-4.6V-Flash, Kimi-VL-A3B-Instruct, Qwen3-VL-30B-A3B-Instruct,
+      Qwen3.5-27B, Qwen3.6-27B) and transfer the resulting attacks to six proprietary frontier models
+      (GPT-5.4, GPT-5.5, Claude Opus 4.6/4.7/4.8, Gemini 3.1 Pro), reporting the Attack Success Rate (ASR, %)
+      per model, per harmful-intent category, and per attack strategy. Higher ASR indicates a more vulnerable model.
+    </p>
+
+    <figure class="exhibit">
+      <img src="images/benchmark.png" alt="Benchmark overview plot" onerror="imgFallback(this)">
+      <figcaption>Fig. 4 — Average ASR across attack strategies, by model. <span class="mono">(drop in images/benchmark.png or images/benchmark.svg)</span></figcaption>
+    </figure>
+
+    <p>
+      Single-turn strategies such as <span class="mono">MML</span> and multi-turn strategies such as
+      <span class="mono">CSDJ</span> consistently surface the highest ASR across both open and proprietary
+      models, while categories with stronger built-in refusal coverage — notably Cybersecurity Threats (E) —
+      remain among the most exploitable in absolute terms once an attack lands. Use the tabs below to inspect
+      ASR (%) per model and per category, for each of the five attack strategies in PHANTOM.
+    </p>
+
+    <div class="tab-row" id="tabRow"></div>
+
+    <div id="tabPanels"></div>
+    <p class="note">Bold red values mark the row-wise (per model) maximum across categories, including Average. Source: PHANTOM benchmark corpus, ASR (%).</p>
+
+    <figure class="exhibit">
+      <img src="images/attack-stats.png" alt="Attack statistics plot" onerror="imgFallback(this)">
+      <figcaption>Fig. 3 — Statistics of generated attacks by strategy and turn count. <span class="mono">(drop in images/attack-stats.png or images/attack-stats.svg)</span></figcaption>
+    </figure>
+  </div>
+</section>
+
 <!-- ===================== DATASET ===================== -->
 <section id="dataset">
   <div class="wrap">
-    <p class="eyebrow">01 — Dataset</p>
+    <p class="eyebrow">02 — Dataset</p>
     <h2 class="section-title">PHANTOM Dataset</h2>
-    <p>
-      Harmful intents are curated and stratified into ten top-level categories — including a dedicated
-      <b>Child Safety</b> category — and further split into 55 fine-grained subcategories, giving broad
-      coverage of the risk surface relevant to multimodal jailbreaks. Each intent is paired with one or more
-      attacks built using <span class="mono">BAP</span>, <span class="mono">IDEATOR</span>,
-      <span class="mono">MML</span>, <span class="mono">FC_ATTACK</span> and <span class="mono">CSDJ</span>.
-    </p>
 
     <div class="two-col">
-      <figure class="exhibit">
-        <img src="images/radar-placeholder.svg" alt="Category coverage radar plot">
-        <figcaption>Fig. 2 — Distribution of harmful intents across risk categories. <span class="mono">(replace images/radar-placeholder.svg with images/radar.png)</span></figcaption>
-      </figure>
+      <p>
+        Harmful intents are curated and stratified into ten top-level categories — including a dedicated
+        <b>Child Safety</b> category — and further split into 55 fine-grained subcategories, giving broad
+        coverage of the risk surface relevant to multimodal jailbreaks. Each intent is paired with one or more
+        attacks built using <span class="mono">BAP</span>, <span class="mono">IDEATOR</span>,
+        <span class="mono">MML</span>, <span class="mono">FC_ATTACK</span> and <span class="mono">CSDJ</span>.
+      </p>
 
       <div>
         <p class="note" style="margin-bottom:6px;">TABLE — Number of intents per category</p>
@@ -476,41 +522,9 @@
     </div>
 
     <figure class="exhibit">
-      <img src="images/attack-stats-placeholder.svg" alt="Attack statistics plot">
-      <figcaption>Fig. 3 — Statistics of generated attacks by strategy and turn count. <span class="mono">(replace images/attack-stats-placeholder.svg with images/attack-stats.png)</span></figcaption>
+      <img src="images/radar.png" alt="Category coverage radar plot" onerror="imgFallback(this)">
+      <figcaption>Fig. 2 — Distribution of harmful intents across risk categories. <span class="mono">(drop in images/radar.png or images/radar.svg)</span></figcaption>
     </figure>
-  </div>
-</section>
-
-<!-- ===================== BENCHMARK / LEADERBOARD ===================== -->
-<section id="leaderboard">
-  <div class="wrap">
-    <p class="eyebrow">02 — Benchmark</p>
-    <h2 class="section-title">PHANTOM Benchmark</h2>
-    <p>
-      We evaluate six open-source VLMs (DeepSeek-VL2, GLM-4.6V-Flash, Kimi-VL-A3B-Instruct, Qwen3-VL-30B-A3B-Instruct,
-      Qwen3.5-27B, Qwen3.6-27B) and transfer the resulting attacks to six proprietary frontier models
-      (GPT-5.4, GPT-5.5, Claude Opus 4.6/4.7/4.8, Gemini 3.1 Pro), reporting the Attack Success Rate (ASR, %)
-      per model, per harmful-intent category, and per attack strategy. Higher ASR indicates a more vulnerable model.
-    </p>
-
-    <figure class="exhibit">
-      <img src="images/benchmark-placeholder.svg" alt="Benchmark overview plot">
-      <figcaption>Fig. 4 — Average ASR across attack strategies, by model. <span class="mono">(replace images/benchmark-placeholder.svg with images/benchmark.png)</span></figcaption>
-    </figure>
-
-    <p>
-      Single-turn strategies such as <span class="mono">MML</span> and multi-turn strategies such as
-      <span class="mono">CSDJ</span> consistently surface the highest ASR across both open and proprietary
-      models, while categories with stronger built-in refusal coverage — notably Cybersecurity Threats (E) —
-      remain among the most exploitable in absolute terms once an attack lands. Use the tabs below to inspect
-      ASR (%) per model and per category, for each of the five attack strategies in PHANTOM.
-    </p>
-
-    <div class="tab-row" id="tabRow"></div>
-
-    <div id="tabPanels"></div>
-    <p class="note">Bold red values mark the row-wise (per model) maximum across categories, including Average. Source: PHANTOM benchmark corpus, ASR (%).</p>
   </div>
 </section>
 
@@ -525,8 +539,8 @@
       visual-textual perturbation patterns most reliably bypass current safety alignment.
     </p>
     <figure class="exhibit">
-      <img src="images/attack-analysis-placeholder.svg" alt="Attack analysis figure">
-      <figcaption>Fig. 5 — Cross-model and cross-category attack transfer analysis. <span class="mono">(replace images/attack-analysis-placeholder.svg with images/attack-analysis.png)</span></figcaption>
+      <img src="images/attack-analysis.png" alt="Attack analysis figure" onerror="imgFallback(this)">
+      <figcaption>Fig. 5 — Cross-model and cross-category attack transfer analysis. <span class="mono">(drop in images/attack-analysis.png or images/attack-analysis.svg)</span></figcaption>
     </figure>
   </div>
 </section>
